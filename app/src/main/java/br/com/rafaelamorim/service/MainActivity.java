@@ -1,12 +1,12 @@
 package br.com.rafaelamorim.service;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -22,6 +22,11 @@ import android.Manifest;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    MyBoundService myService;
+    boolean isBound = false;
+    boolean isServiceRunning = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +37,19 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unbind from the service
+        if (isBound) {
+            unbindService(connection);
+            isBound = false;
+        }
+        if (isServiceRunning){
+            pararMyBackgroundService(this.getCurrentFocus());
+        }
     }
 
     /* SHORT SERVICE
@@ -93,14 +111,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkRunningService(String serviceName) {
-        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceName.equals(service.service.getClassName())) {
-                Toast.makeText(this, "Foreground Service está em execução", Toast.LENGTH_SHORT).show();
-                Log.i("MainActivity.executaForegroundService", "O serviço " + serviceName + " já está em execução");
-            }
+        if (isServiceRunning){
+            Toast.makeText(this, "Foreground Service está em execução", Toast.LENGTH_SHORT).show();
+            Log.i("MainActivity.executaForegroundService", "O serviço " + serviceName + " já está em execução");
             return true;
         }
         return false;
+    }
+
+
+    /*
+    * BOUNDSERVICE
+    *
+    * Tipo de serviço em Android que permite que componentes de uma aplicação se conectem a ele
+    *  e interajam com suas funcionalidades. Diferente de um Started Service, que é iniciado
+    *  e executado em segundo plano sem interação direta com outros componentes, um Bound Service
+    *  é vinculado a um componente, como uma Activity, e permite que o componente interaja
+    *  com o serviço.
+    */
+    private ServiceConnection connection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            MyBoundService.MyBinder binder = (MyBoundService.MyBinder) service;
+            myService = binder.getService();
+            isBound = true;
+            Log.i("MainActivity.connection", myService.getHelloMessage());
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            isBound = false;
+        }
+    };
+
+    public void executaBoundService(View v){
+        // Bind to MyBoundService
+        Intent intent = new Intent(this, MyBoundService.class);
+        bindService(intent, connection, BIND_AUTO_CREATE);
     }
 }

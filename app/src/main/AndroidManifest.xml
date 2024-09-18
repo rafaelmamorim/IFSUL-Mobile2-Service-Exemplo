@@ -41,6 +41,8 @@
             android:value="Development_of_FGS_apps">
         </service>
 
+        <service android:name=".MyBoundService" android:exported="false"/>
+
 
     </application>
 
