@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -26,12 +27,16 @@ public class MainActivity extends AppCompatActivity {
     MyBoundService myService;
     boolean isBound = false;
     boolean isServiceRunning = false;
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        textView = findViewById(R.id.textView);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -107,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void pararMyBackgroundService(View v) {
         Intent backgroundServiceIntent = new Intent(this, MyBackgroundService.class);
+        Log.i("pararMyBackgroundService", "Parando o MyBackgroundService");
         stopService(backgroundServiceIntent);
     }
 
@@ -136,7 +142,17 @@ public class MainActivity extends AppCompatActivity {
             MyBoundService.MyBinder binder = (MyBoundService.MyBinder) service;
             myService = binder.getService();
             isBound = true;
-            Log.i("MainActivity.connection", myService.getHelloMessage());
+
+            // Configura o listener para receber atualizações de tempo
+            myService.setTimeUpdateListener(new MyBoundService.OnTimeUpdateListener() {
+                @Override
+                public void onTimeUpdate(String time) {
+                    runOnUiThread(() -> textView.setText(time));
+                }
+            });
+
+            // Inicia a atualização do relógio
+            myService.startUpdatingTime();
         }
 
         @Override
@@ -145,8 +161,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void executaBoundService(View v){
-        // Bind to MyBoundService
+    public void executaBoundService(View v) {
         Intent intent = new Intent(this, MyBoundService.class);
         bindService(intent, connection, BIND_AUTO_CREATE);
     }
