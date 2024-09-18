@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,11 +32,14 @@
 
         <service
             android:name=".MyShortService"
-            android:exported="false"></service>
+            android:exported="false"/>
 
         <service
             android:name=".MyForegroundService"
-            android:exported="false"></service>
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:value="Development_of_FGS_apps">
+        </service>
 
 
     </application>

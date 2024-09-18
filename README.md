@@ -4,7 +4,7 @@
     </a>
 </p>
 
-# Exemplo de uso dos serviços s
+# Exemplo de uso dos serviços
 
 Repositório criado para mostrar uma aplicação simples usando os diferentes tipos de serviços 
 na disciplina de Desenvolvimento Mobile II, do curso de Tecnólogo em Analise e Desenvolvimento de 

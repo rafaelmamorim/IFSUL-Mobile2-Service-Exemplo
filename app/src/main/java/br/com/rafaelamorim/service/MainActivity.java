@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,9 +13,12 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.Manifest;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +56,15 @@ public class MainActivity extends AppCompatActivity {
     */
     public void executaForegroundService(View v) {
         if (checkRunningService(MyForegroundService.class.getName())) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
+
         Intent foregroundServiceIntent = new Intent(this, MyForegroundService.class);
         startForegroundService(foregroundServiceIntent);
     }

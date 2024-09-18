@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -34,13 +35,10 @@ public class MyForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!isRunning){
-
             new Thread(() -> {
-
                 while (isRunning) {
                     try {
                         Log.i("MyForegroundService", "Registrando log do MyForegroundService - " + new SimpleDateFormat("HH:mm:ss").format(new Date()));
-
                         Thread.sleep(tempoEspera);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -65,7 +63,11 @@ public class MyForegroundService extends Service {
 
             createNotificationChannel(); // Criar canal de notificação (Android 8.0 Oreo e superior)
 
-            startForeground(NOTIFICATION_ID, notificationBuilder.build());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(NOTIFICATION_ID, notificationBuilder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+            } else {
+                startForeground(NOTIFICATION_ID, notificationBuilder.build());
+            }
         }
         return START_STICKY;
     }

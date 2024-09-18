@@ -12,7 +12,7 @@ public class MyShortService extends Service {
 
     private static final String TAG = "MyShortService";
 
-    private static final int tempoEspera = 1000;
+    private static final int tempoEspera = 10000;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
